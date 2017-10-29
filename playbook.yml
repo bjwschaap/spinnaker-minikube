@@ -1,0 +1,33 @@
+---
+- hosts: localhost
+  gather_facts: true
+  become: true
+  vars:
+    minikube_memory: 6500
+    minikube_cpus: 2
+  roles:
+    - andrewrothstein.minikube
+    - mongrelion.docker
+    - andrewrothstein.kubernetes-helm
+  tasks:
+    - name: Install socat
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - socat
+        - jq
+
+    - name: Run minikube
+      command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
+
+#   XXX https://github.com/kubernetes/kubernetes/issues/48025
+#   kubectl get nodes -o jsonpath='{.items[].status.conditions[?(@.reason == "KubeletReady"),?(@.status == False)]}' doesnt work :(
+    - name: Wait for node
+      command: kubectl get nodes --ignore-not-found -o json | jq '.items[].status.conditions[] | select ((.reason == "KubeletReady") and (.status == "False"))'
+      register: minikube_is_ready
+      until: minikube_is_ready != ""
+      retries: 16
+      delay: 2
+    - name: helm init
+      command: helm init
