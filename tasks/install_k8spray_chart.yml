@@ -15,4 +15,4 @@
 
 
 - name: install lcm chart
-  command: "helm install -n k8spray {{ chart_path }}"
+  command: "helm install --namespace k8spray -n k8spray {{ chart_path }}"
