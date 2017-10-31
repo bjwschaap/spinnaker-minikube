@@ -6,7 +6,14 @@ TMP_DIR=`mktemp -u /tmp/minikube-bootstrap.XXXXXXXX`
 linux_distro() {
   echo "Ubuntu 16.04"
 }
-echo $TMP_DIR
+wait_for_cloud_init() {
+  while [ ! -f /var/lib/cloud/instance/boot-finished ]; do
+    echo -e "\033[1;36mWaiting for cloud-init..."
+    sleep 1
+  done
+}
+
+
 case `linux_distro` in
   "Ubuntu 16.04")
     sudo sh -c 'apt-get update && sudo apt install -y git python-pip && pip install ansible==2.3.0.0'
