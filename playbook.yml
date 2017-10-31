@@ -10,7 +10,7 @@
     - mongrelion.docker
     - andrewrothstein.kubernetes-helm
   tasks:
-    - name: Install socat
+    - name: "Install {{ item }}"
       package:
         name: "{{ item }}"
         state: present
@@ -41,7 +41,8 @@
       tags:
         - any
 
-    - include: "install_k8spray_chart.yml"
+    - include: /tmp/minikube-bootstrap.Wail1fIJ/tasks/install_k8spray_chart.yml
+      become: False
       tags:
         - any
         - k8spray_chart

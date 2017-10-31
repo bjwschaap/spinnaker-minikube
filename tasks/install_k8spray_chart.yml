@@ -1,12 +1,13 @@
 - name: set fact
   set_fact:
     chart_path: /tmp/lcm-0.1.0.tgz
+    chart_url: "https://www.dropbox.com/s/w3jnqs6k63hlngy/lcm-0.1.0.tgz"
+
 - name:  download lcm chart
   get_url:
-    url: https://www.dropbox.com/s/w3jnqs6k63hlngy/lcm-0.1.0.tgz
+    url: "{{ chart_url }}"
     dest: "{{ chart_path }}"
     force: true
 
 - name: install lcm chart
   command: "helm install -n k8spray {{ chart_path }}"
-
