@@ -13,7 +13,7 @@ wait_for_cloud_init() {
   done
 }
 
-
+wait_for_cloud_init
 case `linux_distro` in
   "Ubuntu 16.04")
     sudo sh -c 'apt-get update && sudo apt install -y git python-pip && pip install ansible==2.3.0.0'
