@@ -23,6 +23,8 @@ case `linux_distro` in
     ansible-playbook -vvvv playbook.yml >ansible.log 2>&1
   ;;
   "Centos 7")
+    echo "Not supported yet"
+    exit 1
   ;;
   *)
     echo "Unknown distro"
