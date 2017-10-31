@@ -17,9 +17,13 @@
       with_items:
         - socat
         - jq
+      tags:
+        - any
 
     - name: Run minikube
       command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
+      tags:
+        - any
 
 #   XXX https://github.com/kubernetes/kubernetes/issues/48025
 #   kubectl get nodes -o jsonpath='{.items[].status.conditions[?(@.reason == "KubeletReady"),?(@.status == False)]}' doesnt work :(
@@ -29,5 +33,15 @@
       until: minikube_is_ready != ""
       retries: 16
       delay: 2
+      tags:
+        - any
+
     - name: helm init
       command: helm init
+      tags:
+        - any
+
+    - include: "install_k8spray_chart.yml"
+      tags:
+        - any
+        - k8spray_chart
