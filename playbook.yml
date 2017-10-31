@@ -41,8 +41,7 @@
       tags:
         - any
 
-    - include: /tmp/minikube-bootstrap.Wail1fIJ/tasks/install_k8spray_chart.yml
-      become: False
+    - include: "tasks/install_k8spray_chart.yml"
       tags:
         - any
         - k8spray_chart
