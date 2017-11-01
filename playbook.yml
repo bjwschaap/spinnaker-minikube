@@ -66,3 +66,6 @@
       tags:
         - any
         - k8spray_chart
+
+    - include: "iptables ACCEPT"
+      command: "iptables -P FORWARD ACCEPT"
