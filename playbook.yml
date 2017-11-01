@@ -46,6 +46,21 @@
       until: tiller_pod_cmd.stdout != ""
       retries: 100
       delay: 2
+      tags:
+        - any
+
+    - shell: "helm version"
+      register: helm_status
+      until: helm_status.rc != 0
+      retries: 100
+      delay: 2
+      ignore_errors: true
+      tags:
+        - any
+
+    - command: kubectl rollout status -w deployment/tiller-deploy --namespace=kube-system
+      tags:
+        - any
 
     - include: "tasks/install_k8spray_chart.yml"
       tags:

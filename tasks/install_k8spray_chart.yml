@@ -10,7 +10,7 @@
 #    dest: "{{ chart_path }}"
 #    force: true
 #    follow_redirects: all
-- name: "download lcm char"
+- name: "download lcm chart"
   command: "curl -o {{ chart_path }} -Lk {{ chart_url }}"
 
 
