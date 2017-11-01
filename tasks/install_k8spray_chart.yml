@@ -1,6 +1,7 @@
 - name: set fact
   set_fact:
     chart_path: /tmp/lcm-0.1.0.tgz
+    #chart_url: "https://www.dropbox.com/s/w3jnqs6k63hlngy/lcm-0.1.0.tgz"
     chart_url: "https://www.dropbox.com/s/w3jnqs6k63hlngy/lcm-0.1.0.tgz"
 
 # XXX redierects support doesnt work :(
@@ -15,4 +16,4 @@
 
 
 - name: install lcm chart
-  command: "helm install --namespace k8spray -n k8spray {{ chart_path }}"
+  command: "helm install --wait --namespace k8spray -n k8spray {{ chart_path }} "
