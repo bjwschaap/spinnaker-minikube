@@ -6,9 +6,9 @@
     minikube_memory: 6500
     minikube_cpus: 2
   roles:
-    - andrewrothstein.minikube
-    - mongrelion.docker
-    - andrewrothstein.kubernetes-helm
+    - { role: andrewrothstein.minikube, tags: ['any']  }
+    - { role: mongrelion.docker, tags: ['any']  }
+    - { role:  andrewrothstein.kubernetes-helm, tags: ['any']  }
   tasks:
     - name: "Install {{ item }}"
       package:
