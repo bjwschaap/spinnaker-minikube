@@ -75,8 +75,7 @@
     - name: utils
       copy:
         src: files/bash_aliases
-        dst: /root/.bash_aliases
+        dest: /root/.bash_aliases
       tags:
         - any
-	
-
+        - aliases
