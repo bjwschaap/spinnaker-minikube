@@ -20,7 +20,7 @@ case `linux_distro` in
     git clone --depth 1 ${BOOTSRAP_REPO} ${TMP_DIR}
     cd ${TMP_DIR}
     sudo ansible-galaxy install -r ./requirements.yml
-    ansible-playbook -vvvv playbook.yml >ansible.log 2>&1
+    ansible-playbook -vvvv -t any playbook.yml >ansible.log 2>&1
     echo http://`curl ipecho.net/plain`:`kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.ports[0].nodePort}'`
   ;;
   "Centos 7")

@@ -58,9 +58,9 @@
       tags:
         - any
 
-    - command: kubectl rollout status -w deployment/tiller-deploy --namespace=kube-system
-      tags:
-        - any
+    #- command: kubectl rollout status -w deployment/tiller-deploy --namespace=kube-system
+    #  tags:
+    #    - any
 
     - include: "tasks/install_k8spray_chart.yml"
       tags:
