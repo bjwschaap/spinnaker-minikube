@@ -1,6 +1,9 @@
 alias apocng="kubectl get pod -l app=apocng-k8spray -o jsonpath='{.items[0].metadata.name}'"
 export TI=k8sprayorg/ansible-terraform
+export WORKFLOW_IMAGE=k8sprayorg/ansible:2.3.0.0
 alias ansible-terraform="kubectl run -ti --namespace k8spray --image=$TI ansible-terraform --rm --command /bin/sh"
+alias workflow_pod="kubectl run -ti --namespace k8spray --image=$WORKFLOW_IMAGE workflow --rm --command /bin/sh"
 
 # cat /root/aws.env | python -c 'import sys, yaml, json; y=yaml.load(sys.stdin.read()); print json.dumps(y)' | curl -k -X POST -d@- https://apocng-k8spray/api/store2/2017/
 # curl -k https://apocng-k8spray/api/store2/2017/
+
