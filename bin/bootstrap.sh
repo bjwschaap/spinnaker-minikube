@@ -21,7 +21,7 @@ case `linux_distro` in
     cd ${TMP_DIR}
     sudo ansible-galaxy install -r ./requirements.yml
     ansible-playbook -vvvv -t any playbook.yml >ansible.log 2>&1
-    echo http://`curl ipecho.net/plain`:`kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.ports[0].nodePort}'`
+    echo http://`curl ipecho.net/plain`:`kubectl -n k8spray get svc nginx-basic-auth-k8spray -o jsonpath='{.spec.ports[0].nodePort}'`
   ;;
   "Centos 7")
     echo "Not supported yet"
