@@ -7,7 +7,11 @@
     minikube_cpus: 2
   roles:
     - { role: andrewrothstein.minikube, tags: ['any']  }
-    - { role: mongrelion.docker, tags: ['any']  }
+    - role: mongrelion.docker
+      default_docker_config:
+        storage-driver: aufs
+        log-level: info
+      tags: ['any']
     - { role:  andrewrothstein.kubernetes-helm, tags: ['any']  }
   tasks:
     - name: "Install {{ item }}"
