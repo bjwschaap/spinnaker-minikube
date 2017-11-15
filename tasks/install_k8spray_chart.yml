@@ -2,4 +2,4 @@
   command: "helm repo add k8spray {{ k8spray_helm_repo_url }}"
 
 - name: install lcm chart
-  command: "helm install --timeout 900 -f /tmp/values.yml --wait --namespace k8spray -n k8spray k8spray/lcm "
+  command: "helm install --timeout 900 --wait --namespace k8spray -n k8spray k8spray/lcm "
