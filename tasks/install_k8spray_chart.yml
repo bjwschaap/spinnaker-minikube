@@ -1,11 +1,5 @@
 - name: add k8spray chart repo
   command: "helm repo add k8spray {{ k8spray_helm_repo_url }}"
 
-- name: "copy values.yml"
-  template:
-    src: values.yml.j2
-    dest: /tmp/values.yml
-
-
 - name: install lcm chart
   command: "helm install --timeout 900 -f /tmp/values.yml --wait --namespace k8spray -n k8spray k8spray/lcm "
