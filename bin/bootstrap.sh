@@ -1,5 +1,6 @@
 #!/bin/sh
-set -e
+set -e -o pipefail
+
 BOOTSRAP_REPO="https://github.com/metacoma/aws-minikube.git"
 TMP_DIR=`mktemp -u /tmp/minikube-bootstrap.XXXXXXXX`
 
