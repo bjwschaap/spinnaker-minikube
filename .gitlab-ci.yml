@@ -8,7 +8,7 @@ stages:
 minikube:
   stage: prepare
   script:
-    - sudo bin/bootstrap.sh
+    - sudo -i bin/bootstrap.sh
 
 maas_deploy:
   stage: prepare
