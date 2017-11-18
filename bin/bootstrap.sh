@@ -23,6 +23,7 @@ case `linux_distro` in
     sudo sh -c 'apt-get update && sudo apt install -y git python-pip && pip install ansible==2.3.0.0'
     git clone --depth 1 ${BOOTSRAP_REPO} ${TMP_DIR}
     cd ${TMP_DIR}
+    test -n "$CI_COMMIT_REF_NAME" && git checkout $CI_COMMIT_REF_NAME || :
     sudo ansible-galaxy install -r ./requirements.yml
     ansible-playbook -vvvv -t any playbook.yml 2>&1 | tee ansible.log
     echo http://`curl ipecho.net/plain`:`kubectl -n k8spray get svc nginx-basic-auth-k8spray -o jsonpath='{.spec.ports[0].nodePort}'`
