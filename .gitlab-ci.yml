@@ -1,6 +1,6 @@
 before_script:
   - sudo -i minikube delete
-  - sudo -i docker rmi -f k8spray/ansible:2.3.0.0
+  - sudo -i sh -c 'docker inspect --type=image k8spray/ansible:2.3.0.0 && echo ok || :'
 
 bootstrap:
   script:
