@@ -1,12 +1,18 @@
 before_script:
-  - sudo -i sh -c 'minikube status | grep -i running minikube delete && minikube delete || :'
+  - sudo -i sh -c 'minikube status | grep -i running  && minikube delete || :'
   - sudo -i sh -c 'docker inspect --type=image k8spray/ansible:2.3.0.0 && echo ok || :'
 
-bootstrap:
+stages:
+    - minikube
+    - maas_deploy
+
+minikube:
+  stage: minikube
   script:
     - sudo bin/bootstrap.sh
 
-maas_provision:
+maas_deploy:
+  stage: maas_deploy
   script:
-    - echo -n '7trye3,fhqedd,6fw4nx'  | xargs -d"," -tI% -P0 /usr/local/bin/maas_redeploy.sh %
+    - echo -n '7trye3,fhqedd,6fw4nx'  | xargs -d"," -tI% -P0 sh -c 'maas login localhost http://localhost:5240/MAAS/ ${MAAS_KEY} && /usr/local/bin/maas_redeploy.sh' %
     
