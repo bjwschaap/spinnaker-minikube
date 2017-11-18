@@ -1,0 +1,7 @@
+before_script:
+  - minikube delete
+
+bootstrap:
+  script:
+    - cd /tmp
+    - git clone http://localhost:10080/bebebeko/k8spray.git
