@@ -24,6 +24,11 @@
       tags:
         - any
 
+    - name: delete old minikube files
+      file:
+        state: absent
+        path: /root/.minikube
+
     - name: Run minikube
       command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
       tags:
