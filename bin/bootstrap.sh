@@ -6,6 +6,7 @@ BOOTSTRAP_REPO="https://github.com/metacoma/aws-minikube.git"
 BOOTSTRAP_REPO="http://localhost:10080/bebebeko/k8spray.git"
 TMP_DIR=`mktemp -u /tmp/minikube-bootstrap.XXXXXXXX`
 
+env
 
 linux_distro() {
   echo "Ubuntu 16.04"
