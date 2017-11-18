@@ -3,16 +3,15 @@ before_script:
   - sudo -i sh -c 'docker inspect --type=image k8spray/ansible:2.3.0.0 && echo ok || :'
 
 stages:
-    - minikube
-    - maas_deploy
+    - prepare
 
 minikube:
-  stage: minikube
+  stage: prepare
   script:
     - sudo bin/bootstrap.sh
 
 maas_deploy:
-  stage: maas_deploy
+  stage: prepare
   script:
     - echo -n '7trye3,fhqedd,6fw4nx'  | xargs -d"," -tI% -P0 sh -c 'maas login localhost http://localhost:5240/MAAS/ ${MAAS_KEY} && /usr/local/bin/maas_redeploy.sh' %
 
