@@ -5,3 +5,8 @@ before_script:
 bootstrap:
   script:
     - sudo bin/bootstrap.sh
+
+maas_provision:
+  script:
+    - echo -n '7trye3,fhqedd,6fw4nx'  | xargs -d"," -tI% -P0 /usr/local/bin/maas_redeploy.sh %
+    
