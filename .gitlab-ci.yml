@@ -1,5 +1,6 @@
 before_script:
-  - sudo minikube delete
+  - id
+  - sudo id
 
 bootstrap:
   script:
