@@ -4,4 +4,4 @@ before_script:
 
 bootstrap:
   script:
-    - bin/bootstrap.sh
+    - sudo bin/bootstrap.sh
