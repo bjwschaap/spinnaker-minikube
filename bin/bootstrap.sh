@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e -o pipefail
 
 BOOTSRAP_REPO="https://github.com/metacoma/aws-minikube.git"
