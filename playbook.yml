@@ -40,8 +40,8 @@
       tags:
         - any
 
-    - name: helm init
-      command: helm init
+    - name: helm init --upgrade
+      command: helm init --upgrade
       tags:
         - any
 
