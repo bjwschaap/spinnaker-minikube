@@ -24,7 +24,9 @@ start_aws_pipeline:
     - >
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 3, "ENV_ID": "'${ENV_ID}'", "AWS_ACCESS_KEY": "'${AWS_ACCESS_KEY}'",  "AWS_SECRET_KEY": "'${AWS_SECRET_KEY}'",  "AWS_REGION": "us-west-2" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20AWS | jq -r '.ref' | tee /tmp/${ENV_ID}
 
-#wait_for_aws_pipeline_done:
-#  stage: wait_for_aws_pipeline_done
-#  script:
-
+wait_for_aws_pipeline_done:
+  stage: wait_for_aws_pipeline_done
+  script:
+    - export PIPELINE_ID=`cat /tmp/${ENV_ID}`
+    - test -n "${PIPELINE_ID}"
+    - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
