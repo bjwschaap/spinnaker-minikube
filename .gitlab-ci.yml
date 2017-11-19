@@ -10,17 +10,17 @@ minikube:
   script:
     - sudo -i `pwd`/bin/bootstrap.sh
 
-node_7trye3_provision:
+node_sqy8yh_provision:
   stage: prepare
   script:
-    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 7trye3
+    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh sqy8yh
 
-node_fhqedd_provision:
-  stage: prepare
-  script:
-    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh fhqedd
+#node_fhqedd_provision:
+#  stage: prepare
+#  script:
+#    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh fhqedd
 
-node_6fw4nx_provision:
-  stage: prepare
-  script:
-    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 6fw4nx
+#node_6fw4nx_provision:
+#  stage: prepare
+#  script:
+#    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 6fw4nx
