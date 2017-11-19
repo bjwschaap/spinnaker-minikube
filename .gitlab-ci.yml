@@ -20,6 +20,34 @@ minikube:
   environment:
     name: minikube
 
+node_sqy8yh_provision:
+  stage: prepare
+  script:
+    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/ng_maas.sh sqy8yh
+  environment:
+    name: baremetal
+
+node_fhqedd_provision:
+  stage: prepare
+  script:
+    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/ng_maas.sh fhqedd
+  environment:
+    name: baremetal
+
+node_6fw4nx_provision:
+  stage: prepare
+  script:
+    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/ng_maas.sh 6fw4nx
+  environment:
+    name: baremetal
+
+node_7trye3_provision:
+  stage: prepare
+  script:
+    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/ng_maas.sh 7trye3
+  environment:
+    name: baremetal
+
 start_aws_pipeline:
   stage: start_aws_pipeline
   script:
