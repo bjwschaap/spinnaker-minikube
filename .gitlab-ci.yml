@@ -17,7 +17,7 @@ minikube:
 start_aws_pipeline:
   stage: start_aws_pipeline
   script:
-    - export TEST1=1
-    - TEST=2
-    - echo TEST1=$TEST1
-    - echo TEST2=$TEST2
+    - export DECK_ENDPOINT=`sudo -i "kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"`
+    - test -n "$DECK_ENDPOINT"
+    - export ENV_ID=`uuidgen`
+    - curl -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 3, "ENV_ID": "'${ENV_ID}'", "AWS_ACCESS_KEY": "'${AWS_ACCESS_KEY}'",  "AWS_SECRET_KEY": "'${AWS_SECRET_KEY}'",  "AWS_REGION": "us-west-2" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20AWS
