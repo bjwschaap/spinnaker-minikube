@@ -1,10 +1,13 @@
-before_script:
-  - sudo -i sh -c 'minikube status | grep -i running  && minikube delete || :'
-  - sudo -i sh -c 'docker inspect --type=image k8spray/ansible:2.3.0.0 && echo ok || :'
-
 stages:
+  - cleanup
   - prepare
   - start_aws_pipeline
+
+cleanup:
+  stage: cleanup
+  script:
+    - sudo -i sh -c 'minikube status | grep -i running  && minikube delete || :'
+    - sudo -i sh -c 'docker inspect --type=image k8spray/ansible:2.3.0.0 && echo ok || :'
 
 minikube:
   stage: prepare
