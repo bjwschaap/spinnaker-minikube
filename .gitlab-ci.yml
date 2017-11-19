@@ -9,7 +9,7 @@ stages:
 minikube:
   stage: prepare
   script:
-    - sudo -i `pwd`/bin/bootstrap.sh
+    - sudo -i sh -c "CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME `pwd`/bin/bootstrap.sh"
 
 start_aws_pipeline:
   stage: start_aws_pipeline
