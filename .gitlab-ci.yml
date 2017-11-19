@@ -4,6 +4,7 @@ stages:
   - start_aws_pipeline
   - wait_for_aws_pipeline_done
   - scale_aws_pipeline
+  - cleanup_aws_resources
 
 cleanup:
   stage: cleanup
@@ -53,7 +54,7 @@ cleanup_aws_resources:
   stage: cleanup_aws_resources
   script:
     - >
-      curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {ENV_ID": "'${ENV_ID}'" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20destroy | jq -r '.ref' | tee /tmp/${ENV_ID}_destroy
+      curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"ENV_ID": "'${ENV_ID}'" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20destroy | jq -r '.ref' | tee /tmp/${ENV_ID}_destroy
     - export PIPELINE_ID=`cat /tmp/${ENV_ID}_destroy`
     - test -n "${PIPELINE_ID}"
     - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
