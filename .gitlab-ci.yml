@@ -17,6 +17,8 @@ minikube:
   stage: prepare
   script:
     - sudo -i sh -c "CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME `pwd`/bin/bootstrap.sh"
+  environment:
+    name: minikube
 
 start_aws_pipeline:
   stage: start_aws_pipeline
@@ -26,6 +28,8 @@ start_aws_pipeline:
     - export ENV_ID=`uuidgen | tee /tmp/env_id`
     - >
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 3, "ENV_ID": "'${ENV_ID}'", "AWS_ACCESS_KEY": "'${AWS_ACCESS_KEY}'",  "AWS_SECRET_KEY": "'${AWS_SECRET_KEY}'",  "AWS_REGION": "us-west-2" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20AWS | jq -r '.ref' | tee /tmp/${ENV_ID}_install
+  environment:
+    name: amazon
 
 wait_for_aws_pipeline_done:
   stage: wait_for_aws_pipeline_done
@@ -36,6 +40,8 @@ wait_for_aws_pipeline_done:
     - test -n "${PIPELINE_ID}"
     - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
     - curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status | grep SUCCEEDED
+  environment:
+    name: amazon
 
 scale_aws_pipeline:
   stage: scale_aws_pipeline
@@ -44,6 +50,8 @@ scale_aws_pipeline:
     - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
     - >
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1 } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/${ENV_ID}_scale
+  environment:
+    name: amazon
 
 wait_for_aws_scale_job:
   stage: wait_for_aws_scale_pipeline_done
@@ -54,6 +62,8 @@ wait_for_aws_scale_job:
     - test -n "${PIPELINE_ID}"
     - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
     - curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status | grep SUCCEEDED
+  environment:
+    name: amazon
 
 cleanup_aws_resources:
   stage: cleanup_aws_resources
@@ -67,3 +77,5 @@ cleanup_aws_resources:
     - rm -rf /tmp/env_id /tmp/deck_endpoint
     - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
   when: always
+  environment:
+    name: amazon
