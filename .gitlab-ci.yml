@@ -49,6 +49,7 @@ wait_for_aws_scale_job:
   stage: wait_for_aws_scale_pipeline_done
   script:
     - export ENV_ID=$(cat /tmp/env_id)
+    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
     - export PIPELINE_ID=`cat /tmp/${ENV_ID}_scale`
     - test -n "${PIPELINE_ID}"
     - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
