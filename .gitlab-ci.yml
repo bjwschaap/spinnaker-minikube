@@ -1,29 +1,81 @@
 stages:
-    - cleanup
-    - prepare
+  - cleanup
+  - prepare
+  - start_aws_pipeline
+  - wait_for_aws_pipeline_done
+  - scale_aws_pipeline
+  - wait_for_aws_scale_pipeline_done
+  - cleanup_aws_resources
 
 cleanup:
   stage: cleanup
   script:
     - sudo -i sh -c 'minikube status | grep -i running  && minikube delete || :'
-    - sudo -i sh -c 'docker inspect --type=image k8spray/ansible:2.3.0.0 && echo ok || :'
+    - sudo -i sh -c 'docker images -a k8sprayorg/ansible:2.3.0.0 && docker rmi -f k8sprayorg/ansible:2.3.0.0 || :'
 
 minikube:
   stage: prepare
   script:
-    - sudo -i `pwd`/bin/bootstrap.sh
+    - sudo -i sh -c "CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME `pwd`/bin/bootstrap.sh"
+  environment:
+    name: minikube
 
-#node_sqy8yh_provision:
-#  stage: prepare
-#  script:
-#    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh sqy8yh
+start_aws_pipeline:
+  stage: start_aws_pipeline
+  script:
+    - export DECK_ENDPOINT=`sudo -i sh -c "kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"`
+    - test -n "$DECK_ENDPOINT" && echo ${DECK_ENDPOINT} > /tmp/deck_endpoint
+    - export ENV_ID=`uuidgen | tee /tmp/env_id`
+    - >
+      curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 3, "ENV_ID": "'${ENV_ID}'", "AWS_ACCESS_KEY": "'${AWS_ACCESS_KEY}'",  "AWS_SECRET_KEY": "'${AWS_SECRET_KEY}'",  "AWS_REGION": "us-west-2" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20AWS | jq -r '.ref' | tee /tmp/${ENV_ID}_install
+  environment:
+    name: amazon
 
-#node_fhqedd_provision:
-#  stage: prepare
-#  script:
-#    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh fhqedd
+wait_for_aws_pipeline_done:
+  stage: wait_for_aws_pipeline_done
+  script:
+    - export ENV_ID=$(cat /tmp/env_id)
+    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
+    - export PIPELINE_ID=`cat /tmp/${ENV_ID}_install`
+    - test -n "${PIPELINE_ID}"
+    - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
+    - curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status | grep SUCCEEDED
+  environment:
+    name: amazon
 
-#node_6fw4nx_provision:
-#  stage: prepare
-#  script:
-#    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 6fw4nx
+scale_aws_pipeline:
+  stage: scale_aws_pipeline
+  script:
+    - export ENV_ID=$(cat /tmp/env_id)
+    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
+    - >
+      curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1 } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/${ENV_ID}_scale
+  environment:
+    name: amazon
+
+wait_for_aws_scale_job:
+  stage: wait_for_aws_scale_pipeline_done
+  script:
+    - export ENV_ID=$(cat /tmp/env_id)
+    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
+    - export PIPELINE_ID=`cat /tmp/${ENV_ID}_scale`
+    - test -n "${PIPELINE_ID}"
+    - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
+    - curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status | grep SUCCEEDED
+  environment:
+    name: amazon
+
+cleanup_aws_resources:
+  stage: cleanup_aws_resources
+  script:
+    - export ENV_ID=$(cat /tmp/env_id)
+    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
+    - >
+      curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"ENV_ID": "'${ENV_ID}'" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20destroy | jq -r '.ref' | tee /tmp/${ENV_ID}_destroy
+    - export PIPELINE_ID=`cat /tmp/${ENV_ID}_destroy`
+    - test -n "${PIPELINE_ID}"
+    - rm -rf /tmp/env_id /tmp/deck_endpoint
+    - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
+  when: always
+  environment:
+    name: amazon

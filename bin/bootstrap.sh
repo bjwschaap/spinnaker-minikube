@@ -24,7 +24,7 @@ wait_for_cloud_init
 case `linux_distro` in
   "Ubuntu 16.04")
     sudo sh -c 'apt-get update && sudo apt install -y git python-pip && pip install ansible==2.3.0.0'
-    git clone --depth 1 ${BOOTSTRAP_REPO} ${TMP_DIR}
+    git clone ${BOOTSTRAP_REPO} ${TMP_DIR}
     cd ${TMP_DIR}
     test -n "$CI_COMMIT_REF_NAME" && git checkout $CI_COMMIT_REF_NAME || :
     sudo ansible-galaxy install -r ./requirements.yml
