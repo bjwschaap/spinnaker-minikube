@@ -12,7 +12,8 @@ minikube:
     - sudo -i `pwd`/bin/bootstrap.sh
 
 start_aws_pipeline:
-  scripts:
+  stage: start_aws_pipeline
+  script:
     - export TEST1=1
     - TEST=2
     - echo TEST1=$TEST1
