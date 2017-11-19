@@ -43,7 +43,7 @@ scale_aws_pipeline:
     - export ENV_ID=$(cat /tmp/env_id)
     - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
     - >
-      curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/${ENV_ID}_scale
+      curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1 } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/${ENV_ID}_scale
 
 wait_for_aws_scale_job:
   stage: wait_for_aws_scale_pipeline_done
