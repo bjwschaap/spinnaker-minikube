@@ -3,32 +3,28 @@ before_script:
   - sudo -i sh -c 'docker inspect --type=image k8spray/ansible:2.3.0.0 && echo ok || :'
 
 stages:
-    - prepare1
-    - prepare2
-    - prepare3
-    - prepare4
-
+    - prepare
 #minikube:
 #  stage: prepare
 #  script:
 #    - sudo -i `pwd`/bin/bootstrap.sh
 
 node_sqy8yh_provision:
-  stage: prepare1
+  stage: prepare
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh sqy8yh
 
 node_fhqedd_provision:
-  stage: prepare2
+  stage: prepare
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh fhqedd
 
 node_6fw4nx_provision:
-  stage: prepare3
+  stage: prepare
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 6fw4nx
 
 node_7trye3_provision:
-  stage: prepare4
+  stage: prepare
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 7trye3
