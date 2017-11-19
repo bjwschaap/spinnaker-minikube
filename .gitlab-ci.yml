@@ -11,7 +11,7 @@ cleanup:
   stage: cleanup
   script:
     - sudo -i sh -c 'minikube status | grep -i running  && minikube delete || :'
-    - sudo -i sh -c 'docker inspect --type=image k8spray/ansible:2.3.0.0 && echo ok || :'
+    - sudo -i sh -c 'docker images -a k8sprayorg/ansible:2.3.0.0 && docker rmi -f k8sprayorg/ansible:2.3.0.0 || :'
 
 minikube:
   stage: prepare
@@ -63,7 +63,6 @@ cleanup_aws_resources:
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"ENV_ID": "'${ENV_ID}'" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20destroy | jq -r '.ref' | tee /tmp/${ENV_ID}_destroy
     - export PIPELINE_ID=`cat /tmp/${ENV_ID}_destroy`
     - test -n "${PIPELINE_ID}"
-    - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
     - rm -rf /tmp/env_id /tmp/deck_endpoint
-    - curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status | grep STATUS
+    - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
   when: always
