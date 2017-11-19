@@ -17,7 +17,7 @@ minikube:
 start_aws_pipeline:
   stage: start_aws_pipeline
   script:
-    - export DECK_ENDPOINT=`sudo -i "kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"`
+    - export DECK_ENDPOINT=`sudo -i sh -c "kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"`
     - test -n "$DECK_ENDPOINT"
     - export ENV_ID=`uuidgen`
     - >
