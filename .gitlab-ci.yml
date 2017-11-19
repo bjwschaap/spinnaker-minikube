@@ -26,7 +26,7 @@ node_6fw4nx_provision:
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 6fw4nx
 
-#node_7trye3_provision:
-#  stage: prepare2
-#  script:
-#    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 7trye3
+node_7trye3_provision:
+  stage: prepare2
+  script:
+    - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/maas_redeploy.sh 7trye3
