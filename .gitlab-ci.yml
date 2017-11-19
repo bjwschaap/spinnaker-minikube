@@ -31,7 +31,7 @@ wait_for_aws_pipeline_done:
   stage: wait_for_aws_pipeline_done
   script:
     - export ENV_ID=$(cat /tmp/env_id)
-    - export DECK_ENDPOINT=(cat /tmp/deck_endpoint)
+    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
     - export PIPELINE_ID=`cat /tmp/${ENV_ID}_install`
     - test -n "${PIPELINE_ID}"
     - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
@@ -41,7 +41,7 @@ scale_aws_pipeline:
   stage: scale_aws_pipeline
   script:
     - export ENV_ID=$(cat /tmp/env_id)
-    - export DECK_ENDPOINT=(cat /tmp/deck_endpoint)
+    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
     - >
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/${ENV_ID}_scale
 
@@ -58,7 +58,7 @@ cleanup_aws_resources:
   stage: cleanup_aws_resources
   script:
     - export ENV_ID=$(cat /tmp/env_id)
-    - export DECK_ENDPOINT=(cat /tmp/deck_endpoint)
+    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
     - >
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"ENV_ID": "'${ENV_ID}'" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20destroy | jq -r '.ref' | tee /tmp/${ENV_ID}_destroy
     - export PIPELINE_ID=`cat /tmp/${ENV_ID}_destroy`
