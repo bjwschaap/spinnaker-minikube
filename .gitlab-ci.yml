@@ -4,7 +4,7 @@ stages:
   - install_pipeline
   - install_wait
 #  - scale_pipeline
-#  - wait_for_aws_scale_pipeline_done
+#  - wait_for_aws_scale_pipeline_done 
   - cleanup_aws_resources
 
 cleanup:
