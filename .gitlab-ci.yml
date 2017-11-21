@@ -2,9 +2,7 @@ stages:
   - cleanup
   - prepare
   - install_pipeline
-  - install_wait
 #  - scale_pipeline
-#  - wait_for_aws_scale_pipeline_done
   - cleanup_aws_resources
 
 cleanup:
@@ -91,20 +89,6 @@ install_aws_pipeline:
     - export ENV_ID=`uuidgen | tee /tmp/env_id`
     - >
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 3, "ENV_ID": "'${ENV_ID}'", "AWS_ACCESS_KEY": "'${AWS_ACCESS_KEY}'",  "AWS_SECRET_KEY": "'${AWS_SECRET_KEY}'",  "AWS_REGION": "us-west-2" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20AWS | jq -r '.ref' | tee /tmp/${ENV_ID}_install
-  environment:
-    name: amazon
-  only:
-    - web
-    - triggers
-    - schedules
-    - pipelines
-
-
-wait_aws_install:
-  stage: install_wait
-  script:
-    - export ENV_ID=$(cat /tmp/env_id)
-    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
     - export PIPELINE_ID=`cat /tmp/${ENV_ID}_install`
     - test -n "${PIPELINE_ID}"
     - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
@@ -126,21 +110,7 @@ install_bm_pipeline:
     - export BM_NODES=`/usr/local/bin/maas_table.sh`
     - >
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"ENV_ID": "'${ENV_ID}'", "NODES": "'${BM_NODES}'",  "USER": "ubuntu",  "SSH_PRIVATE_KEY": "-----BEGIN RSA PRIVATE KEY----- MIIEpAIBAAKCAQEAzlMbooTW5mR9qIfDFAD8pnWfhy23IRHcLz2A1nDvpgHKni+k UiF5g9VxpsG0taWVIfPX3s0VIbtWyVf18L1dVa0lTL4X82y7IhJFYU63Js+Z2Sk1 k3XKC7cgWBmMq+kpx1ID08W0IcF49rf3GtlXdodA8zqNlElVNaS9ZPUdYwSk3p3i y9uUOVhU9nihn0o6CSamPGP20iy1vLQUmMgyUr7J/g2AbwM27CCwr6hC0HbW05nN rzwN9CBjtobCJiFoJbXJQeLO+u8hhCAUP6vUymoZ6apJ5WNERhn5kK5InfnxXa2V V+BxhAKam0hAs2b6EpWOYAIQHaUrfAmlJPT+QwIDAQABAoIBAQCjb73yTRwWQQAx IenrzKRWD9KguBvafFVYrnWCaM/NRpoEGGUoEhA52DhBCixlv5aU4J3dhcL5h3bF 44GUg8yNc6yaT/KVB0ptQN/opvv6KHUMStJ/zsyP3y4l24dNHlPT6inR9UgtfR6f ATci84uO/rD6eyVvk2+GIMtOT8RJjBXB6bgIvUUsfOsAHJWHdX0Zz24r0Y9DIq4J sHJQXM1Hi8J4eHPoOEvUaXrnNs5n3ktmg9MxIMNjLZUO1QjgJh4XXeLWzmxX4Cm5 p6pTrfuVfAK/3MRZuWTWz+fNvHia45iZV+CGVuQYy/DtKvk1e5vu1DTyRueky0dc 5L21KM/BAoGBAPAJszuZfX05+7492EqMxV3cDTxYBulsxkrvef7mpEQHPXHgXlvt 69oHwI7PYogeDBzLeAlgYj8FpEZC26gQsl5jFTVlmMAaF5VlVMuf2BIjvJYbGfRr SGDqRDT+w0rtZqcP6JSj7SgK8YnASG+sYF52FeRbdjU1BxXzNDnvvwSxAoGBANwL fPuWbPkETWSqAx/VHDn2OM5TQiRm3CjM3A5Vn/uRb1NNS6r8SsudT1wSMBA2By22 6JDj6Y5fRuz0v3MYtAPYZ1g9DbbBdQX2SryFeSDAYaHFCf8HsRxDnndKG6QNjsQS LZ1T4gkQDQsXHxGdTlcnXxHd/BwuEH9v0mrpl78zAoGAFOyzjCGAN/djA51+ilkl J150ZOtDhvuteYDQwLC4Zxm+eHvXnenqonIEji5z52u/II94IlEdn2LNhDZ10XvL IMFAaww1OaHMpoBT2QBRJJuq5+bq50ym3ZPuaDRBL/nr9epEGxkDJnd1wM1bQyji qblfhS2X62F5AafWyKomm7ECgYEA08WWrocyL2JNncDlquAt/zaRqziD4obAAeBP NNiBVNq+Onycg122Gko2k1TJvwBQXlW3c6J1J9lYaDqQepPexAikRU7VAPskxe0o NlF6puOf0tHQcgqUELCfNQ00lumZaehY0B5n3vL8qpzBAPHU8JnqrEZpGTHYHN2g s9ZGffMCgYBPCybgHiD36FSqptxD8OC84sYSU7j6v5UevF46YJjK1yjTRiZXJL3u E28a07ETDeTH6qMDsxSxCJ97OtQwATTtQuVfDnVghdoZG2QJ7FK7Qz4V4Dy5iplm Znph7wMIEV8g0KImnKnNMBbjPuaySflMva0Q9Shdy/dYr3Oxhq7Acw== -----END RSA PRIVATE KEY-----" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20manual | jq -r '.ref' | tee /tmp/${ENV_ID}_install_bm
-  environment:
-    name: baremetal
-  only:
-    - web
-    - triggers
-    - schedules
-    - pipelines
-
-wait_bm_install:
-  stage: install_wait
-  script:
-    - export ENV_ID=$(cat /tmp/env_id_bm)
-    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint_bm)
     - export PIPELINE_ID=`cat /tmp/${ENV_ID}_install_bm`
-    - test -n "${PIPELINE_ID}"
     - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
     - curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status | grep SUCCEEDED
   environment:
