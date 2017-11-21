@@ -111,7 +111,8 @@ scale_aws_pipeline:
     - export SSH_USER=ubuntu
     - export MASTER_NODE=`curl -ks https://${APOCNG_ENDPOINT}/api/store2/${ENV_ID}/ | jq -r '[.apocng_terraform.modules[].resources[] | select(.type == "aws_instance")][0].primary.attributes.public_ip'`
     - export REMOTE_DECK_ENDPOINT=`ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null  -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} sudo kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'`
-    - echo '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1 } }' | ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$REMOTE_DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/aws_scale_id
+    - >
+      echo '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1 } }' | ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$REMOTE_DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/aws_scale_id
     - export SCALE_PIPELINE_ID=`cat /tmp/aws_scale_id`
     - while [ `ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} curl -s $REMOTE_DECK_ENDPOINT/gate${SCALE_PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} curl -s $REMOTE_DECK_ENDPOINT/gate${SCALE_PIPELINE_ID} | jq -r .status | grep SUCCEEDED
