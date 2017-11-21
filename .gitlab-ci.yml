@@ -42,6 +42,7 @@ node_sqy8yh_provision:
     - triggers
     - schedules
     - pipelines
+  retry: 2
 
 node_fhqedd_provision:
   stage: prepare
@@ -54,6 +55,7 @@ node_fhqedd_provision:
     - triggers
     - schedules
     - pipelines
+  retry: 2
 
 node_6fw4nx_provision:
   stage: prepare
@@ -66,6 +68,7 @@ node_6fw4nx_provision:
     - triggers
     - schedules
     - pipelines
+  retry: 2
 
 node_7trye3_provision:
   stage: prepare
@@ -78,6 +81,7 @@ node_7trye3_provision:
     - triggers
     - schedules
     - pipelines
+  retry: 2
 
 install_aws_pipeline:
   stage: install_pipeline
