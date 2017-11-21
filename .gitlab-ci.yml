@@ -150,6 +150,7 @@ install_bm_pipeline:
     - schedules
     - pipelines
   dependencies:
+    - minikube
     - node_sqy8yh_provision
     - node_fhqedd_provision
     - node_6fw4nx_provision
