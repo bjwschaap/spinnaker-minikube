@@ -100,6 +100,8 @@ install_aws_pipeline:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - minikube
 
 scale_aws_pipeline:
   stage: scale
@@ -123,6 +125,8 @@ scale_aws_pipeline:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - install_aws_pipeline
 
 
 
@@ -145,6 +149,11 @@ install_bm_pipeline:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - node_sqy8yh_provision
+    - node_fhqedd_provision
+    - node_6fw4nx_provision
+    - node_7trye3_provision
 
 scale_bm_pipeline:
   stage: scale
@@ -169,6 +178,8 @@ scale_bm_pipeline:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - install_bm_pipeline
 
 #scale_aws_pipeline:
 #  stage: scale_pipeline
@@ -211,3 +222,5 @@ cleanup_aws_resources:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - scale_aws_pipeline
