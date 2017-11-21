@@ -100,6 +100,8 @@ install_aws_pipeline:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - minikube
 
 scale_aws_pipeline:
   stage: scale
@@ -123,6 +125,8 @@ scale_aws_pipeline:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - install_aws_pipeline
 
 
 
@@ -145,6 +149,12 @@ install_bm_pipeline:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - minikube
+    - node_sqy8yh_provision
+    - node_fhqedd_provision
+    - node_6fw4nx_provision
+    - node_7trye3_provision
 
 scale_bm_pipeline:
   stage: scale
@@ -169,28 +179,8 @@ scale_bm_pipeline:
     - triggers
     - schedules
     - pipelines
-
-#scale_aws_pipeline:
-#  stage: scale_pipeline
-#  script:
-#    - export ENV_ID=$(cat /tmp/env_id)
-#    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
-#    - >
-#      curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1 } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/${ENV_ID}_scale
-#  environment:
-#    name: amazon
-#
-#wait_for_aws_scale_job:
-#  stage: wait_for_aws_scale_pipeline_done
-#  script:
-#    - export ENV_ID=$(cat /tmp/env_id)
-#    - export DECK_ENDPOINT=$(cat /tmp/deck_endpoint)
-#    - export PIPELINE_ID=`cat /tmp/${ENV_ID}_scale`
-#    - test -n "${PIPELINE_ID}"
-#    - while [ `curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
-#    - curl -s $DECK_ENDPOINT/gate${PIPELINE_ID} | jq -r .status | grep SUCCEEDED
-#  environment:
-#    name: amazon
+  dependencies:
+    - install_bm_pipeline
 
 cleanup_aws_resources:
   stage: cleanup_aws_resources
@@ -211,3 +201,5 @@ cleanup_aws_resources:
     - triggers
     - schedules
     - pipelines
+  dependencies:
+    - scale_aws_pipeline
