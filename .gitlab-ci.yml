@@ -1,8 +1,8 @@
 stages:
   - cleanup
   - prepare
-  - install_pipeline
-#  - scale_pipeline
+  - install
+  - scale
   - cleanup_aws_resources
 
 cleanup:
@@ -82,7 +82,7 @@ node_7trye3_provision:
   retry: 2
 
 install_aws_pipeline:
-  stage: install_pipeline
+  stage: install
   script:
     - export DECK_ENDPOINT=`sudo -i sh -c "kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"`
     - test -n "$DECK_ENDPOINT" && echo ${DECK_ENDPOINT} > /tmp/deck_endpoint
@@ -101,13 +101,37 @@ install_aws_pipeline:
     - schedules
     - pipelines
 
+scale_aws_pipeline:
+  stage: scale
+  script:
+    - export APOCNG_ENDPOINT=`sudo -i sh -c "kubectl -n k8spray get svc apocng-k8spray -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"`
+    - export ENV_ID=`cat /tmp/env_id`
+    - curl -k https://${APOCNG_ENDPOINT}/api/store2/${ENV_ID}/ | jq -r '.apocng_ssh_private_key' > /tmp/aws_key
+    - chmod 600 /tmp/aws_key
+    - export SSH_USER=ubuntu
+    - export MASTER_NODE=`curl -ks https://${APOCNG_ENDPOINT}/api/store2/${ENV_ID}/ | jq -r '[.apocng_terraform.modules[].resources[] | select(.type == "aws_instance")][0].primary.attributes.public_ip'`
+    - export REMOTE_DECK_ENDPOINT=`ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null  -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} sudo kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'`
+    - echo '{"type":"manual",  "user":"[anonymous]", "parameters": {"N": 1 } }' | ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$REMOTE_DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20scale | jq -r '.ref' | tee /tmp/aws_scale_id
+    - export SCALE_PIPELINE_ID=`cat /tmp/aws_scale_id`
+    - while [ `ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} curl -s $REMOTE_DECK_ENDPOINT/gate${SCALE_PIPELINE_ID} | jq -r .status` == "RUNNING" ]; do sleep 5; done
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/aws_key ${SSH_USERNAME}@${MASTER_NODE} curl -s $REMOTE_DECK_ENDPOINT/gate${SCALE_PIPELINE_ID} | jq -r .status | grep SUCCEEDED
+  environment:
+    name: amazon
+  only:
+    - web
+    - triggers
+    - schedules
+    - pipelines
+
+
+
 install_bm_pipeline:
-  stage: install_pipeline
+  stage: install
   script:
     - export DECK_ENDPOINT=`sudo -i sh -c "kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"`
     - test -n "$DECK_ENDPOINT" && echo ${DECK_ENDPOINT} > /tmp/deck_endpoint_bm
     - export ENV_ID=`uuidgen | tee /tmp/env_id_bm`
-    - export BM_NODES=`/usr/local/bin/maas_table.sh`
+    - export BM_NODES=`/usr/local/bin/maas_table.sh | grep -m3 'Deployed' | awk '{print $1}' | xargs | sed 's/ /,/g'`
     - >
       curl -s -d '{"type":"manual",  "user":"[anonymous]", "parameters": {"ENV_ID": "'${ENV_ID}'", "NODES": "'${BM_NODES}'",  "USER": "ubuntu",  "SSH_PRIVATE_KEY": "-----BEGIN RSA PRIVATE KEY----- MIIEpAIBAAKCAQEAzlMbooTW5mR9qIfDFAD8pnWfhy23IRHcLz2A1nDvpgHKni+k UiF5g9VxpsG0taWVIfPX3s0VIbtWyVf18L1dVa0lTL4X82y7IhJFYU63Js+Z2Sk1 k3XKC7cgWBmMq+kpx1ID08W0IcF49rf3GtlXdodA8zqNlElVNaS9ZPUdYwSk3p3i y9uUOVhU9nihn0o6CSamPGP20iy1vLQUmMgyUr7J/g2AbwM27CCwr6hC0HbW05nN rzwN9CBjtobCJiFoJbXJQeLO+u8hhCAUP6vUymoZ6apJ5WNERhn5kK5InfnxXa2V V+BxhAKam0hAs2b6EpWOYAIQHaUrfAmlJPT+QwIDAQABAoIBAQCjb73yTRwWQQAx IenrzKRWD9KguBvafFVYrnWCaM/NRpoEGGUoEhA52DhBCixlv5aU4J3dhcL5h3bF 44GUg8yNc6yaT/KVB0ptQN/opvv6KHUMStJ/zsyP3y4l24dNHlPT6inR9UgtfR6f ATci84uO/rD6eyVvk2+GIMtOT8RJjBXB6bgIvUUsfOsAHJWHdX0Zz24r0Y9DIq4J sHJQXM1Hi8J4eHPoOEvUaXrnNs5n3ktmg9MxIMNjLZUO1QjgJh4XXeLWzmxX4Cm5 p6pTrfuVfAK/3MRZuWTWz+fNvHia45iZV+CGVuQYy/DtKvk1e5vu1DTyRueky0dc 5L21KM/BAoGBAPAJszuZfX05+7492EqMxV3cDTxYBulsxkrvef7mpEQHPXHgXlvt 69oHwI7PYogeDBzLeAlgYj8FpEZC26gQsl5jFTVlmMAaF5VlVMuf2BIjvJYbGfRr SGDqRDT+w0rtZqcP6JSj7SgK8YnASG+sYF52FeRbdjU1BxXzNDnvvwSxAoGBANwL fPuWbPkETWSqAx/VHDn2OM5TQiRm3CjM3A5Vn/uRb1NNS6r8SsudT1wSMBA2By22 6JDj6Y5fRuz0v3MYtAPYZ1g9DbbBdQX2SryFeSDAYaHFCf8HsRxDnndKG6QNjsQS LZ1T4gkQDQsXHxGdTlcnXxHd/BwuEH9v0mrpl78zAoGAFOyzjCGAN/djA51+ilkl J150ZOtDhvuteYDQwLC4Zxm+eHvXnenqonIEji5z52u/II94IlEdn2LNhDZ10XvL IMFAaww1OaHMpoBT2QBRJJuq5+bq50ym3ZPuaDRBL/nr9epEGxkDJnd1wM1bQyji qblfhS2X62F5AafWyKomm7ECgYEA08WWrocyL2JNncDlquAt/zaRqziD4obAAeBP NNiBVNq+Onycg122Gko2k1TJvwBQXlW3c6J1J9lYaDqQepPexAikRU7VAPskxe0o NlF6puOf0tHQcgqUELCfNQ00lumZaehY0B5n3vL8qpzBAPHU8JnqrEZpGTHYHN2g s9ZGffMCgYBPCybgHiD36FSqptxD8OC84sYSU7j6v5UevF46YJjK1yjTRiZXJL3u E28a07ETDeTH6qMDsxSxCJ97OtQwATTtQuVfDnVghdoZG2QJ7FK7Qz4V4Dy5iplm Znph7wMIEV8g0KImnKnNMBbjPuaySflMva0Q9Shdy/dYr3Oxhq7Acw== -----END RSA PRIVATE KEY-----" } }' -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' http://$DECK_ENDPOINT/gate/pipelines/lcm/Kubernetes%20manual | jq -r '.ref' | tee /tmp/${ENV_ID}_install_bm
     - export PIPELINE_ID=`cat /tmp/${ENV_ID}_install_bm`
@@ -120,6 +144,27 @@ install_bm_pipeline:
     - triggers
     - schedules
     - pipelines
+
+# NOT SUPPORTED YET BY SPINNAKER
+#scale_bm_pipeline:
+#  stage: scale
+#  script:
+#    - export APOCNG_ENDPOINT=`sudo -i sh -c "kubectl -n k8spray get svc apocng-k8spray -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"`
+#    - export ENV_ID=`cat /tmp/env_id_bm`
+#    - curl -k https://${APOCNG_ENDPOINT}/api/store2/${ENV_ID}/ | jq -r '.apocng_ssh_private_key' > /tmp/bm_key
+#    - chmod 600 /tmp/bm_key
+#    - export SSH_USER=ubuntu
+#    - export MASTER_NODE=`curl -ks https://${APOCNG_ENDPOINT}/api/store2/${ENV_ID}/ | jq -r '.apocng_manual_nodes[0]'`
+#    - export REMOTE_DECK_ENDPOINT=`ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null  -i /tmp/bm_key ${SSH_USERNAME}@${MASTER_NODE} sudo kubectl -n k8spray get svc spinnaker-k8spray-deck -o jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'`
+#    - export NEW_NODE=`/usr/local/bin/maas_table.sh | tail -n1 | awk '{print $1}' | xargs | sed 's/ /,/g'`
+#    - echo
+#  environment:
+#    name: baremetal
+#  only:
+#    - web
+#    - triggers
+#    - schedules
+#    - pipelines
 
 #scale_aws_pipeline:
 #  stage: scale_pipeline
