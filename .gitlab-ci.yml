@@ -30,7 +30,7 @@ minikube:
     - pipelines
 
 node_sqy8yh_provision:
-  stage: prepare
+  stage: cleanup
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/ng_maas.sh sqy8yh
   environment:
@@ -43,7 +43,7 @@ node_sqy8yh_provision:
   retry: 2
 
 node_fhqedd_provision:
-  stage: prepare
+  stage: cleanup
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/ng_maas.sh fhqedd
   environment:
@@ -56,7 +56,7 @@ node_fhqedd_provision:
   retry: 2
 
 node_6fw4nx_provision:
-  stage: prepare
+  stage: cleanup
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/ng_maas.sh 6fw4nx
   environment:
@@ -69,7 +69,7 @@ node_6fw4nx_provision:
   retry: 2
 
 node_7trye3_provision:
-  stage: prepare
+  stage: cleanup
   script:
     - maas login localhost http://localhost:5240/MAAS/ ${MAAS_TOKEN} && /usr/local/bin/ng_maas.sh 7trye3
   environment:
