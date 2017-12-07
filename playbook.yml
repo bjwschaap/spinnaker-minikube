@@ -39,6 +39,7 @@
     - name: Minikube workaround (delete cluster)
       command: minikube delete
       when: minikube_start.rc != 0
+      ignore_errors: true
 
     - name: Minikube workaround (create cluster)
       command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
