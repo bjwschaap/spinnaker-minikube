@@ -24,7 +24,7 @@
 
     - include: tasks/minikube.yml
     - include: tasks/helm.yml
-    - include: "tasks/install_k8spray_chart.yml" helm_ignore_errors=True
+    - include: tasks/install_k8spray_chart.yml helm_ignore_errors=True
 
     - name: Minikube workaround (delete cluster)
       command: minikube delete
@@ -38,7 +38,8 @@
       static: no
       when: helm_chart.rc != 0
 
-    - include: "tasks/install_k8spray_chart.yml" helm_ignore_errors=False
+    - include: tasks/install_k8spray_chart.yml helm_ignore_errors=False
+      station: no
       when: helm_chart.rc != 0
 
     - name: "iptables ACCEPT"
