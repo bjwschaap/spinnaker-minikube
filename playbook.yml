@@ -6,18 +6,12 @@
     minikube_memory: 6500
     minikube_cpus: 2
   roles:
-    - { role: andrewrothstein.minikube, tags: ['any']  }
+    - role: andrewrothstein.minikube
     - role: mongrelion.docker
       default_docker_config:
         storage-driver: aufs
         log-level: info
-      tags: ['any']
-    - { role:  andrewrothstein.kubernetes-helm, tags: ['any']  }
-    - role: ahuffman.resolv
-      resolv_nameservers:
-        - 8.8.8.8
-        - 8.8.4.4
-      tags: ['any']
+    - role:  andrewrothstein.kubernetes-helm
 
   tasks:
     - name: "Install {{ item }}"
@@ -27,82 +21,31 @@
       with_items:
         - socat
         - jq
-      tags:
-        - any
 
-    - name: delete old minikube files
-      file:
-        state: absent
-        path: /root/.minikube
-
-    - name: Run minikube
-      command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
-      tags:
-        - any
-      register: minikube_start
-      ignore_errors: true
+    - include: tasks/minikube.yml
+    - include: tasks/helm.yml
+    - include: tasks/install_k8spray_chart.yml helm_ignore_errors=True
 
     - name: Minikube workaround (delete cluster)
       command: minikube delete
-      when: minikube_start.rc != 0
-      ignore_errors: true
+      when: helm_chart.rc != 0
 
-    - name: Minikube workaround (create cluster)
-      command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
-      when: minikube_start.rc != 0
+    - include: tasks/minikube.yml
+      static: no
+      when: helm_chart.rc != 0
 
+    - include: tasks/helm.yml
+      static: no
+      when: helm_chart.rc != 0
 
-#   XXX https://github.com/kubernetes/kubernetes/issues/48025
-#   kubectl get nodes -o jsonpath='{.items[].status.conditions[?(@.reason == "KubeletReady"),?(@.status == False)]}' doesnt work :(
-    - name: Wait for node
-      command: kubectl get nodes --ignore-not-found -o json | jq '.items[].status.conditions[] | select ((.reason == "KubeletReady") and (.status == "False"))'
-      register: minikube_is_ready
-      until: minikube_is_ready != ""
-      retries: 16
-      delay: 2
-      tags:
-        - any
-
-    - name: helm init --upgrade
-      command: helm init --upgrade
-      tags:
-        - any
-
-    - shell: "kubectl -n kube-system get pods --ignore-not-found -l name=tiller -o jsonpath='{.items[?(@.status.containerStatuses[0].ready == true)].metadata.name}'"
-      register: tiller_pod_cmd
-      until: tiller_pod_cmd.stdout != ""
-      retries: 100
-      delay: 2
-      tags:
-        - any
-
-    - shell: "helm version"
-      register: helm_status
-      until: helm_status.rc == 0
-      retries: 100
-      delay: 2
-      ignore_errors: true
-      tags:
-        - any
-
-    #- command: kubectl rollout status -w deployment/tiller-deploy --namespace=kube-system
-    #  tags:
-    #    - any
-
-    - include: "tasks/install_k8spray_chart.yml"
-      tags:
-        - any
-        - k8spray_chart
+    - include: tasks/install_k8spray_chart.yml helm_ignore_errors=False
+      station: no
+      when: helm_chart.rc != 0
 
     - name: "iptables ACCEPT"
       command: "iptables -P FORWARD ACCEPT"
-      tags:
-        - any
 
     - name: utils
       copy:
         src: files/bash_aliases
         dest: /root/.bash_aliases
-      tags:
-        - any
-        - aliases
