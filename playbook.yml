@@ -33,6 +33,17 @@
       command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
       tags:
         - any
+      register: minikube_start
+      ignore_errors: true
+
+    - name: Minikube workaround (delete cluster)
+      command: minikube delete
+      when: minikube_start.rc != 0
+
+    - name: Minikube workaround (create cluster)
+      command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
+      when: minikube_start.rc != 0
+
 
 #   XXX https://github.com/kubernetes/kubernetes/issues/48025
 #   kubectl get nodes -o jsonpath='{.items[].status.conditions[?(@.reason == "KubeletReady"),?(@.status == False)]}' doesnt work :(
