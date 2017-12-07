@@ -5,7 +5,7 @@
     path: /root/.minikube
 
 - name: Run minikube
-  command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
+  command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }} --bootstrapper kubeadm"
   register: minikube_start
   ignore_errors: true
 
