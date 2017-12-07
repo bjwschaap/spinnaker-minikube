@@ -5,6 +5,9 @@
     path: /root/.minikube
 
 - name: Run minikube
+  command: "minikube config set WantReportErrorPrompt false"
+
+- name: Run minikube
   command: "minikube start --vm-driver none --kubernetes-version v1.7.7 --memory {{ minikube_memory }} --cpus {{ minikube_cpus }} --bootstrapper kubeadm"
   register: minikube_start
   ignore_errors: true
