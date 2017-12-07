@@ -22,51 +22,20 @@
         - socat
         - jq
 
-    - name: delete old minikube files
-      file:
-        state: absent
-        path: /root/.minikube
-
-    - name: Run minikube
-      command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
-      register: minikube_start
-      ignore_errors: true
-
-
-
-#   XXX https://github.com/kubernetes/kubernetes/issues/48025
-#   kubectl get nodes -o jsonpath='{.items[].status.conditions[?(@.reason == "KubeletReady"),?(@.status == False)]}' doesnt work :(
-    - name: Wait for node
-      command: kubectl get nodes --ignore-not-found -o json | jq '.items[].status.conditions[] | select ((.reason == "KubeletReady") and (.status == "False"))'
-      register: minikube_is_ready
-      until: minikube_is_ready != ""
-      retries: 16
-      delay: 2
-
-    - name: helm init --upgrade
-      command: helm init --upgrade
-
-    - shell: "kubectl -n kube-system get pods --ignore-not-found -l name=tiller -o jsonpath='{.items[?(@.status.containerStatuses[0].ready == true)].metadata.name}'"
-      register: tiller_pod_cmd
-      until: tiller_pod_cmd.stdout != ""
-      retries: 100
-      delay: 2
-
-    - shell: "helm version"
-      register: helm_status
-      until: helm_status.rc == 0
-      retries: 100
-      delay: 2
-      ignore_errors: true
-
+    - include: tasks/minikube.yml
+    - include: tasks/helm.yml
     - include: "tasks/install_k8spray_chart.yml" helm_ignore_errors=True
 
     - name: Minikube workaround (delete cluster)
       command: minikube delete
       when: helm_chart.rc != 0
 
-    - name: Minikube workaround (create cluster)
-      command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
+    - include: tasks/minikube.yml
+      static: no
+      when: helm_chart.rc != 0
+
+    - include: tasks/helm.yml
+      static: no
       when: helm_chart.rc != 0
 
     - include: "tasks/install_k8spray_chart.yml" helm_ignore_errors=False

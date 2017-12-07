@@ -1,0 +1,16 @@
+- name: helm init --upgrade
+  command: helm init --upgrade
+
+- shell: "kubectl -n kube-system get pods --ignore-not-found -l name=tiller -o jsonpath='{.items[?(@.status.containerStatuses[0].ready == true)].metadata.name}'"
+  register: tiller_pod_cmd
+  until: tiller_pod_cmd.stdout != ""
+  retries: 100
+  delay: 2
+
+- shell: "helm version"
+  register: helm_status
+  until: helm_status.rc == 0
+  retries: 100
+  delay: 2
+  ignore_errors: true
+
