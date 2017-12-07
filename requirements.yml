@@ -1,3 +1,7 @@
-- src: andrewrothstein.minikube
+- name: andrewrothstein.minikube
+  src: https://github.com/andrewrothstein/ansible-minikube
+  scm: git
+  version: master
+
 - src: mongrelion.docker
 - src: andrewrothstein.kubernetes-helm
