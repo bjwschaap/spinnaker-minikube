@@ -1,0 +1,22 @@
+
+- name: delete old minikube files
+  file:
+    state: absent
+    path: /root/.minikube
+
+- name: Run minikube
+  command: "minikube config set WantReportErrorPrompt false"
+
+- name: Run minikube
+  command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }} --bootstrapper localkube"
+  register: minikube_start
+  ignore_errors: true
+
+# XXX https://github.com/kubernetes/kubernetes/issues/48025
+# kubectl get nodes -o jsonpath='{.items[].status.conditions[?(@.reason == "KubeletReady"),?(@.status == False)]}' doesnt work :(
+- name: Wait for node
+  command: kubectl get nodes --ignore-not-found -o json | jq '.items[].status.conditions[] | select ((.reason == "KubeletReady") and (.status == "False"))'
+  register: minikube_is_ready
+  until: minikube_is_ready != ""
+  retries: 16
+  delay: 2

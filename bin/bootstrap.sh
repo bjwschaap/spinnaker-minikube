@@ -3,7 +3,7 @@ set -xe -o pipefail
 
 # XXX this should break the deployment on amazon
 BOOTSTRAP_REPO="https://github.com/metacoma/aws-minikube.git"
-BOOTSTRAP_REPO="http://localhost:10080/bebebeko/k8spray.git"
+#BOOTSTRAP_REPO="http://localhost:10080/bebebeko/k8spray.git"
 TMP_DIR=`mktemp -u /tmp/minikube-bootstrap.XXXXXXXX`
 
 env
@@ -28,7 +28,7 @@ case `linux_distro` in
     cd ${TMP_DIR}
     test -n "$CI_COMMIT_REF_NAME" && git checkout $CI_COMMIT_REF_NAME || :
     sudo ansible-galaxy install -r ./requirements.yml
-    ansible-playbook -vvvv -t any playbook.yml 2>&1 | tee ansible.log
+    ansible-playbook -vvvv playbook.yml 2>&1 | tee ansible.log
     echo http://`curl ipecho.net/plain`:`kubectl -n k8spray get svc nginx-basic-auth-k8spray -o jsonpath='{.spec.ports[0].nodePort}'`
   ;;
   "Centos 7")
