@@ -6,13 +6,12 @@
     minikube_memory: 6500
     minikube_cpus: 2
   roles:
-    - { role: andrewrothstein.minikube, tags: ['any']  }
+    - role: andrewrothstein.minikube
     - role: mongrelion.docker
       default_docker_config:
         storage-driver: aufs
         log-level: info
-      tags: ['any']
-    - { role:  andrewrothstein.kubernetes-helm, tags: ['any']  }
+    - role:  andrewrothstein.kubernetes-helm
 
   tasks:
     - name: "Install {{ item }}"
@@ -22,8 +21,6 @@
       with_items:
         - socat
         - jq
-      tags:
-        - any
 
     - name: delete old minikube files
       file:
@@ -32,19 +29,9 @@
 
     - name: Run minikube
       command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
-      tags:
-        - any
       register: minikube_start
       ignore_errors: true
 
-    - name: Minikube workaround (delete cluster)
-      command: minikube delete
-      when: minikube_start.rc != 0
-      ignore_errors: true
-
-    - name: Minikube workaround (create cluster)
-      command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
-      when: minikube_start.rc != 0
 
 
 #   XXX https://github.com/kubernetes/kubernetes/issues/48025
@@ -55,21 +42,15 @@
       until: minikube_is_ready != ""
       retries: 16
       delay: 2
-      tags:
-        - any
 
     - name: helm init --upgrade
       command: helm init --upgrade
-      tags:
-        - any
 
     - shell: "kubectl -n kube-system get pods --ignore-not-found -l name=tiller -o jsonpath='{.items[?(@.status.containerStatuses[0].ready == true)].metadata.name}'"
       register: tiller_pod_cmd
       until: tiller_pod_cmd.stdout != ""
       retries: 100
       delay: 2
-      tags:
-        - any
 
     - shell: "helm version"
       register: helm_status
@@ -77,27 +58,24 @@
       retries: 100
       delay: 2
       ignore_errors: true
-      tags:
-        - any
 
-    #- command: kubectl rollout status -w deployment/tiller-deploy --namespace=kube-system
-    #  tags:
-    #    - any
+    - include: "tasks/install_k8spray_chart.yml" helm_ignore_errors=True
 
-    - include: "tasks/install_k8spray_chart.yml"
-      tags:
-        - any
-        - k8spray_chart
+    - name: Minikube workaround (delete cluster)
+      command: minikube delete
+      when: helm_chart.rc != 0
+
+    - name: Minikube workaround (create cluster)
+      command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }}"
+      when: helm_chart.rc != 0
+
+    - include: "tasks/install_k8spray_chart.yml" helm_ignore_errors=False
+      when: helm_chart.rc != 0
 
     - name: "iptables ACCEPT"
       command: "iptables -P FORWARD ACCEPT"
-      tags:
-        - any
 
     - name: utils
       copy:
         src: files/bash_aliases
         dest: /root/.bash_aliases
-      tags:
-        - any
-        - aliases

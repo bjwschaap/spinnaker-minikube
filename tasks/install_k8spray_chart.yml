@@ -3,3 +3,5 @@
 
 - name: install lcm chart
   command: "helm install --timeout 900 --wait --namespace k8spray -n k8spray k8spray/lcm "
+  register: helm_chart
+  ignore_errors: "{{ helm_ignore_errors | default(False) }}"
