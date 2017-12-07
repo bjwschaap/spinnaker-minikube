@@ -1,3 +1,4 @@
 - src: andrewrothstein.minikube
 - src: mongrelion.docker
 - src: andrewrothstein.kubernetes-helm
+- src: ahuffman.resolv

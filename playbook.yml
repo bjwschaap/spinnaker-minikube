@@ -13,6 +13,11 @@
         log-level: info
       tags: ['any']
     - { role:  andrewrothstein.kubernetes-helm, tags: ['any']  }
+    - role: ahuffman.resolv
+      resolv_nameservers:
+        - 8.8.8.8
+        - 8.8.4.4
+
   tasks:
     - name: "Install {{ item }}"
       package:
