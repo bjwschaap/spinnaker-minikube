@@ -6,6 +6,8 @@ BOOTSTRAP_REPO="https://github.com/metacoma/aws-minikube.git"
 #BOOTSTRAP_REPO="http://localhost:10080/bebebeko/k8spray.git"
 TMP_DIR=`mktemp -u /tmp/minikube-bootstrap.XXXXXXXX`
 
+export LC_ALL=C
+
 env
 
 linux_distro() {
