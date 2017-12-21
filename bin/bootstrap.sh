@@ -21,6 +21,9 @@ wait_for_cloud_init() {
   done
 }
 
+myip() {
+  dig +short myip.opendns.com @resolver1.opendns.com
+}
 
 wait_for_cloud_init
 case `linux_distro` in
@@ -31,7 +34,7 @@ case `linux_distro` in
     test -n "$CI_COMMIT_REF_NAME" && git checkout $CI_COMMIT_REF_NAME || :
     sudo ansible-galaxy install -r ./requirements.yml
     ansible-playbook -vvvv playbook.yml 2>&1 | tee ansible.log
-    echo http://`curl ipecho.net/plain`:`kubectl -n k8spray get svc nginx-basic-auth-k8spray -o jsonpath='{.spec.ports[0].nodePort}'`
+    echo http://`myip`:`kubectl -n k8spray get svc nginx-basic-auth-k8spray -o jsonpath='{.spec.ports[0].nodePort}'`
   ;;
   "Centos 7")
     echo "Not supported yet"
