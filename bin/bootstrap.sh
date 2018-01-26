@@ -28,7 +28,7 @@ myip() {
 wait_for_cloud_init
 case `linux_distro` in
   "Ubuntu 16.04")
-    sudo sh -c 'apt-get update && sudo apt install -y git python-pip && pip install ansible==2.3.0.0'
+    sudo sh -c 'apt-get update && sudo apt install -y git python-pip && pip install ansible==2.4.0.0'
     git clone ${BOOTSTRAP_REPO} ${TMP_DIR}
     cd ${TMP_DIR}
     test -n "$CI_COMMIT_REF_NAME" && git checkout $CI_COMMIT_REF_NAME || :
