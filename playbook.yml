@@ -11,7 +11,8 @@
       default_docker_config:
         storage-driver: aufs
         log-level: info
-    - role:  andrewrothstein.kubernetes-helm
+    - role: andrewrothstein.kubernetes-helm
+      kubernetes_helm_ver: v2.7.2
 
   tasks:
     - name: "Install {{ item }}"
