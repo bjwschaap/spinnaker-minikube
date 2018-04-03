@@ -32,6 +32,7 @@ case `linux_distro` in
     git clone ${BOOTSTRAP_REPO} ${TMP_DIR}
     cd ${TMP_DIR}
     test -n "$CI_COMMIT_REF_NAME" && git checkout $CI_COMMIT_REF_NAME || :
+    sudo apt-get --auto-remove --yes remove python-openssl && sudo pip install pyOpenSSL
     sudo ansible-galaxy install -r ./requirements.yml
     ansible-playbook -vvvv playbook.yml 2>&1 | tee ansible.log
     echo http://`myip`:`kubectl -n k8spray get svc nginx-basic-auth-k8spray -o jsonpath='{.spec.ports[0].nodePort}'`
