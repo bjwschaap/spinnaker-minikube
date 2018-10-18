@@ -8,7 +8,7 @@
   command: "minikube config set WantReportErrorPrompt false"
 
 - name: Run minikube
-  command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }} --kubernetes-version v1.8.0 --bootstrapper localkube"
+  command: "minikube start --vm-driver none --memory {{ minikube_memory }} --cpus {{ minikube_cpus }} --kubernetes-version v1.10.0"
   register: minikube_start
   ignore_errors: true
 
